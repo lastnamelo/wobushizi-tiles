@@ -1,0 +1,11 @@
+{
+  "name": "tiles",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first Chinese teaching tile graphics app.",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "build": "node scripts/build.mjs"
+  }
+}
