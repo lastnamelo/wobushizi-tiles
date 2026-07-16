@@ -41,9 +41,15 @@ Deploy the contents of `tiles/dist/` to any static host and point `tiles.wobushi
 
 ## Dataset
 
-The sample pinyin data lives in `data/pinyin-map.js`.
+The bundled pinyin data lives in `data/pinyin-map.js`.
 
-Replace or expand it with your real character-to-pinyin dataset:
+It is generated from the main wobushizi character dataset:
+
+```bash
+npm run generate:pinyin
+```
+
+The generated shape is:
 
 ```js
 export const PINYIN_MAP = {
@@ -53,7 +59,7 @@ export const PINYIN_MAP = {
 };
 ```
 
-The first pronunciation in the array is used by default, so put the most common/default pinyin first when you swap in a larger dataset. If a character has alternates, clicking its pinyin cycles through them. Missing characters render with blank pinyin so they can still be used in the graphic.
+The first pronunciation in the array is used by default. If a character has alternates, clicking its pinyin cycles through them. Missing characters render with blank pinyin so they can still be used in the graphic.
 
 ## Colors
 
