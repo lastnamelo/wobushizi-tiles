@@ -29,4 +29,4 @@ export const THEME = {
 };
 
 export const FONT_STACK =
-  '"Avenir Next", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif';
+  '"Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif';
