@@ -27,8 +27,6 @@ export function createGraphicSvg(items, controls) {
     rect.setAttribute("height", String(box.height));
     rect.setAttribute("rx", "0");
     rect.setAttribute("fill", color);
-    rect.setAttribute("stroke", THEME.line);
-    rect.setAttribute("stroke-width", "1");
     svg.append(rect);
 
     appendText(svg, box.char, box.x + box.width / 2, box.y + controls.tilePadding + controls.hanziSize * 0.82, {

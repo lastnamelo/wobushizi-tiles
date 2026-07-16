@@ -229,7 +229,7 @@ button:focus-visible {
   height: var(--tile-size);
   padding: var(--tile-padding);
   border-radius: var(--tile-radius);
-  border: 1px solid #c7b7a2;
+  border: 0;
   color: #6d5b4e;
   cursor: pointer;
   line-height: 1;

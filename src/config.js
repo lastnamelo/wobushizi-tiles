@@ -16,7 +16,7 @@ export const DEFAULT_CONTROLS = {
   tileGap: 10,
   tileSize: 104,
   borderRadius: 0,
-  exportScale: 2
+  exportScale: 4
 };
 
 export const THEME = {
