@@ -1,8 +1,8 @@
 export const TILE_PALETTE = [
   { id: "white", name: "White", label: "", value: "#FFFFFF" },
-  { id: "red", name: "Red", label: "subject", value: "#D98F86" },
+  { id: "red", name: "Red", label: "noun", value: "#D98F86" },
   { id: "green", name: "Green", label: "verb", value: "#BFD4BC" },
-  { id: "blue", name: "Blue", label: "object", value: "#B8CCD8" },
+  { id: "blue", name: "Blue", label: "modifier", value: "#B8CCD8" },
   { id: "grey", name: "Grey", label: "grammar", value: "#D8D6D0" },
   { id: "yellow", name: "Yellow", label: "measure", value: "#E0CD9F" },
   { id: "purple", name: "Purple", label: "other", value: "#C8BEDB" },

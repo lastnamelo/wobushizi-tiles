@@ -12,6 +12,7 @@ const elements = {
   sourceText: document.querySelector("#sourceText"),
   makeTiles: document.querySelector("#makeTiles"),
   editText: document.querySelector("#editText"),
+  copyAllSvg: document.querySelector("#copyAllSvg"),
   clearInput: document.querySelector("#clearInput"),
   board: document.querySelector("#tileBoard"),
   inputStatus: document.querySelector("#inputStatus"),
@@ -32,6 +33,7 @@ function bindEvents() {
     showTilesPage();
   });
   elements.editText.addEventListener("click", showInputPage);
+  elements.copyAllSvg.addEventListener("click", copyAllSvg);
   elements.clearInput.addEventListener("click", () => {
     elements.sourceText.value = "";
     setStatus("Input cleared.", elements.inputStatus);
@@ -89,6 +91,47 @@ async function copySingleTile(id) {
   } catch (error) {
     console.error(error);
     setStatus("Clipboard copy is unavailable in this browser.");
+  }
+}
+
+async function copyAllSvg() {
+  try {
+    const svg = createGraphicSvg(items, controls);
+    const clipboardTypes = {
+      "text/html": new Blob([svg], { type: "text/html" }),
+      "text/plain": new Blob([svg], { type: "text/plain" })
+    };
+    if (ClipboardItem.supports?.("image/svg+xml")) {
+      clipboardTypes["image/svg+xml"] = new Blob([svg], { type: "image/svg+xml" });
+    }
+
+    await navigator.clipboard.write([new ClipboardItem(clipboardTypes)]);
+    setStatus("SVG copied.");
+  } catch (error) {
+    console.error(error);
+    try {
+      copyTextFallback(createGraphicSvg(items, controls));
+      setStatus("SVG markup copied.");
+    } catch (fallbackError) {
+      console.error(fallbackError);
+      setStatus("SVG copy is unavailable in this browser.");
+    }
+  }
+}
+
+function copyTextFallback(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  document.body.append(textarea);
+  textarea.select();
+  const didCopy = document.execCommand("copy");
+  textarea.remove();
+  if (!didCopy) {
+    throw new Error("Fallback copy failed.");
   }
 }
 

@@ -20,28 +20,33 @@ export function createGraphicSvg(items, controls) {
 
   for (const box of layout.boxes) {
     const color = TILE_PALETTE[box.colorIndex]?.value ?? TILE_PALETTE[0].value;
+    const group = document.createElementNS(xmlNamespace, "g");
+    group.setAttribute("data-tile", box.char);
+    group.setAttribute("transform", `translate(${box.x} ${box.y})`);
+
     const rect = document.createElementNS(xmlNamespace, "rect");
-    rect.setAttribute("x", String(box.x));
-    rect.setAttribute("y", String(box.y));
+    rect.setAttribute("x", "0");
+    rect.setAttribute("y", "0");
     rect.setAttribute("width", String(box.width));
     rect.setAttribute("height", String(box.height));
     rect.setAttribute("rx", "0");
     rect.setAttribute("fill", color);
-    svg.append(rect);
+    group.append(rect);
 
-    appendText(svg, box.char, box.x + box.width / 2, box.y + controls.tilePadding + controls.hanziSize * 0.82, {
+    appendText(group, box.char, box.width / 2, controls.tilePadding + controls.hanziSize * 0.82, {
       size: controls.hanziSize,
       weight: "600",
       anchor: "middle",
       fill: THEME.hanziInk
     });
 
-    appendText(svg, pinyinToDisplay(box.pinyin), box.x + box.width / 2, box.y + box.height - controls.tilePadding * 0.8, {
+    appendText(group, pinyinToDisplay(box.pinyin), box.width / 2, box.height - controls.tilePadding * 0.8, {
       size: controls.pinyinSize,
       weight: "500",
       anchor: "middle",
       fill: box.pinyin ? THEME.hanziInk : "#B8ACA1"
     });
+    svg.append(group);
   }
 
   return new XMLSerializer().serializeToString(svg);

@@ -65,7 +65,7 @@ The first pronunciation in the array is used by default. If a character has alte
 
 The tile color cycle lives in `src/config.js` and is ordered:
 
-white, red subject, green verb, blue object, grey grammar, yellow measure, purple other, pink expression.
+white, red noun, green verb, blue modifier, grey grammar, yellow measure, purple other, pink expression.
 
 ## Export
 

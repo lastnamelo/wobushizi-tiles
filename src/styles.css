@@ -1,6 +1,6 @@
 :root {
   color: #6d5b4e;
-  background: #f5efe6;
+  background: #e9ded0;
   font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
   font-synthesis: none;
 }
@@ -12,7 +12,7 @@
 body {
   min-height: 100vh;
   margin: 0;
-  background: #f5efe6;
+  background: #e9ded0;
   color: #6d5b4e;
 }
 
@@ -81,19 +81,20 @@ h1 {
 
 .panel,
 .preview-panel {
-  border: 1px solid #d7cab9;
-  background: #fffdf9;
-  box-shadow: 0 2px 14px rgba(109, 91, 78, 0.08);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .panel {
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 0;
+  padding: 0;
 }
 
 .input-panel {
   width: 100%;
   max-width: none;
+  background: transparent;
 }
 
 .input-label {
@@ -126,7 +127,7 @@ button:focus-visible {
 .button-row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
 }
@@ -153,7 +154,7 @@ button:focus-visible {
   display: grid;
   grid-template-columns: repeat(8, minmax(78px, 1fr));
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 36px;
   overflow-x: auto;
 }
 
@@ -180,8 +181,9 @@ button:focus-visible {
 
 .bottom-actions {
   display: flex;
-  justify-content: center;
-  margin-top: 16px;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
 }
 
 .bottom-actions button {
@@ -193,9 +195,9 @@ button:focus-visible {
 
 .preview-surface {
   min-height: 74vh;
-  padding: 28px;
+  padding: 0;
   overflow: auto;
-  background: #ffffff;
+  background: transparent;
 }
 
 .tile-board {
@@ -278,8 +280,8 @@ button:focus-visible {
 .copy-tile {
   min-height: 28px;
   padding: 4px 8px;
-  border-color: #d7cab9;
-  background: #fffdf9;
+  border: 0;
+  background: transparent;
   color: #6d5b4e;
   font-size: 12px;
   font-weight: 400;
@@ -297,7 +299,6 @@ button:focus-visible {
 
   .preview-surface {
     min-height: 54vh;
-    padding: 18px;
   }
 
 }

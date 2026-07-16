@@ -21,17 +21,17 @@
 
       <section class="page page-input" id="inputPage" aria-label="Paste text">
         <div class="panel input-panel">
-          <label class="input-label" for="sourceText">Chinese text</label>
           <textarea
             id="sourceText"
+            aria-label="Chinese text"
             spellcheck="false"
             autocomplete="off"
             rows="8"
-          >你好！今天我们学习中文。银行也可以很有意思。</textarea>
+          >老师中文版准备上课</textarea>
 
           <div class="button-row">
-            <button type="button" class="primary-button" id="makeTiles">Make tiles</button>
             <button type="button" id="clearInput">Clear</button>
+            <button type="button" class="primary-button" id="makeTiles">Make tiles</button>
           </div>
           <p class="status" id="inputStatus" role="status" aria-live="polite"></p>
         </div>
@@ -45,7 +45,8 @@
           </div>
         </section>
         <div class="bottom-actions">
-          <button type="button" id="editText">Back to input</button>
+          <button type="button" id="copyAllSvg">Copy all as SVG</button>
+          <button type="button" class="primary-button" id="editText">Back to input</button>
         </div>
         <p class="status" id="status" role="status" aria-live="polite"></p>
       </section>
