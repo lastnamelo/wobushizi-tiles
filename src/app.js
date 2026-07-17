@@ -95,22 +95,14 @@ async function copySingleTile(id) {
 }
 
 async function copyAllSvg() {
+  const svg = createGraphicSvg(items, controls);
   try {
-    const svg = createGraphicSvg(items, controls);
-    const clipboardTypes = {
-      "text/html": new Blob([svg], { type: "text/html" }),
-      "text/plain": new Blob([svg], { type: "text/plain" })
-    };
-    if (ClipboardItem.supports?.("image/svg+xml")) {
-      clipboardTypes["image/svg+xml"] = new Blob([svg], { type: "image/svg+xml" });
-    }
-
-    await navigator.clipboard.write([new ClipboardItem(clipboardTypes)]);
-    setStatus("SVG copied.");
+    await navigator.clipboard.writeText(svg);
+    setStatus("SVG markup copied.");
   } catch (error) {
     console.error(error);
     try {
-      copyTextFallback(createGraphicSvg(items, controls));
+      copyTextFallback(svg);
       setStatus("SVG markup copied.");
     } catch (fallbackError) {
       console.error(fallbackError);
