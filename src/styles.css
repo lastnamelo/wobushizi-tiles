@@ -75,6 +75,12 @@ h1 {
   justify-content: center;
 }
 
+.page-tiles:not(.is-hidden) {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 132px);
+}
+
 .is-hidden {
   display: none;
 }
@@ -84,6 +90,11 @@ h1 {
   border: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.preview-panel {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .panel {
@@ -194,7 +205,8 @@ button:focus-visible {
 }
 
 .preview-surface {
-  min-height: 74vh;
+  min-height: 0;
+  max-height: calc(100vh - 254px);
   padding: 0;
   overflow: auto;
   background: transparent;
@@ -293,12 +305,12 @@ button:focus-visible {
     padding-top: 18px;
   }
 
-  .preview-panel {
-    min-height: 54vh;
+  .page-tiles:not(.is-hidden) {
+    min-height: calc(100vh - 112px);
   }
 
   .preview-surface {
-    min-height: 54vh;
+    max-height: calc(100vh - 232px);
   }
 
 }
