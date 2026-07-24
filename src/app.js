@@ -1,6 +1,7 @@
 import { DEFAULT_CONTROLS, TILE_PALETTE } from "./config.js";
-import { createGraphicSvg, createSentenceSvg, svgToPngBlob } from "./export.js";
+import { createGraphicSvg, createSentenceSvg, createSentenceWordSvg, svgToPngBlob } from "./export.js";
 import { parseTextToTiles } from "./parser.js";
+import { lookupPinyin } from "./pinyin.js";
 import { renderPalette, renderSentence, renderTiles } from "./renderer.js";
 import { parseTextToSentence } from "./sentence-parser.js";
 
@@ -21,6 +22,7 @@ const elements = {
   clearInput: document.querySelector("#clearInput"),
   board: document.querySelector("#tileBoard"),
   sentenceBoard: document.querySelector("#sentenceBoard"),
+  sentenceMeaningBar: document.querySelector("#sentenceMeaningBar"),
   inputStatus: document.querySelector("#inputStatus"),
   status: document.querySelector("#status"),
   paletteStrip: document.querySelector("#paletteStrip")
@@ -77,14 +79,22 @@ function render() {
   elements.paletteStrip?.classList.toggle("is-hidden", mode !== "tiles");
   elements.board.classList.toggle("is-hidden", mode !== "tiles");
   elements.sentenceBoard?.classList.toggle("is-hidden", mode !== "sentence");
-  elements.copySentencePng?.classList.toggle("is-hidden", mode !== "sentence");
-  elements.copyAllSvg.textContent = mode === "sentence" ? "Copy sentence as SVG" : "Copy all as SVG";
+  elements.sentenceMeaningBar?.classList.add("is-hidden");
+  elements.copySentencePng?.classList.add("is-hidden");
+  elements.copyAllSvg.classList.toggle("is-hidden", mode === "sentence");
+  elements.copyAllSvg.textContent = "Copy all as SVG";
 
   if (mode === "sentence" && elements.sentenceBoard) {
     renderSentence({
       board: elements.sentenceBoard,
       lines: sentenceLines,
-      controls
+      controls,
+      onMerge: mergeSentenceGroups,
+      onSplit: splitSentenceGroup,
+      onMeaningChange: updateSentenceMeaning,
+      onColorCycle: cycleSentenceColor,
+      onPinyinCycle: cycleSentencePinyin,
+      onCopyWord: copySentenceWord
     });
     return;
   }
@@ -102,6 +112,131 @@ function render() {
 function parseSentence() {
   sentenceLines = parseTextToSentence(elements.sourceText.value);
   render();
+}
+
+function updateSentenceMeaning(id, meaning) {
+  sentenceLines = sentenceLines.map((line) => ({
+    ...line,
+    groups: line.groups.map((group) => (group.id === id ? { ...group, meaning } : group))
+  }));
+}
+
+function mergeSentenceGroups(lineIndex, groupIndex) {
+  const line = sentenceLines[lineIndex];
+  if (!line || groupIndex < 0 || groupIndex >= line.groups.length - 1) return;
+
+  const first = line.groups[groupIndex];
+  const second = line.groups[groupIndex + 1];
+  const pinyin = [first.pinyin, second.pinyin].filter(Boolean).join(" ");
+  const merged = {
+    id: `${first.id}-${second.id}`,
+    text: `${first.text}${second.text}`,
+    pinyin,
+    chars: [...groupToChars(first), ...groupToChars(second)],
+    colorIndex: first.colorIndex ?? 0,
+    meaning: [first.meaning, second.meaning].filter(Boolean).join(" / ")
+  };
+
+  sentenceLines = sentenceLines.map((candidate, candidateIndex) => {
+    if (candidateIndex !== lineIndex) return candidate;
+    return {
+      ...candidate,
+      groups: [
+        ...candidate.groups.slice(0, groupIndex),
+        merged,
+        ...candidate.groups.slice(groupIndex + 2)
+      ]
+    };
+  });
+  render();
+}
+
+function splitSentenceGroup(lineIndex, groupIndex) {
+  const line = sentenceLines[lineIndex];
+  const group = line?.groups[groupIndex];
+  if (!group) return;
+
+  const chars = Array.from(group.text);
+  if (chars.length <= 1) return;
+
+  const syllables = group.pinyin.trim().split(/\s+/).filter(Boolean);
+  const splitGroups = chars.map((char, index) => ({
+    id: `${group.id}-split-${index}-${char.codePointAt(0)}`,
+    text: char,
+    pinyin: groupToChars(group)[index]?.pinyinOptions[groupToChars(group)[index]?.pinyinIndex] ?? syllables[index] ?? lookupPinyin(char)[0] ?? "",
+    chars: [groupToChars(group)[index] ?? createSentenceChar(char, index)],
+    colorIndex: group.colorIndex ?? 0,
+    meaning: ""
+  }));
+
+  sentenceLines = sentenceLines.map((candidate, candidateIndex) => {
+    if (candidateIndex !== lineIndex) return candidate;
+    return {
+      ...candidate,
+      groups: [
+        ...candidate.groups.slice(0, groupIndex),
+        ...splitGroups,
+        ...candidate.groups.slice(groupIndex + 1)
+      ]
+    };
+  });
+  render();
+}
+
+function cycleSentenceColor(id) {
+  sentenceLines = sentenceLines.map((line) => ({
+    ...line,
+    groups: line.groups.map((group) =>
+      group.id === id
+        ? { ...group, colorIndex: ((group.colorIndex ?? 0) + 1) % TILE_PALETTE.length }
+        : group
+    )
+  }));
+  render();
+}
+
+function cycleSentencePinyin(groupId, charIndex) {
+  sentenceLines = sentenceLines.map((line) => ({
+    ...line,
+    groups: line.groups.map((group) => {
+      if (group.id !== groupId) return group;
+      const chars = groupToChars(group).map((char, index) => {
+        if (index !== charIndex || char.pinyinOptions.length <= 1) return char;
+        return { ...char, pinyinIndex: (char.pinyinIndex + 1) % char.pinyinOptions.length };
+      });
+      return withUpdatedPinyin({ ...group, chars });
+    })
+  }));
+  render();
+}
+
+function groupToChars(group) {
+  if (group.chars?.length) return group.chars;
+  const syllables = group.pinyin.trim().split(/\s+/).filter(Boolean);
+  return Array.from(group.text).map((char, index) => ({
+    ...createSentenceChar(char, index),
+    pinyinOptions: syllables[index] ? [syllables[index], ...lookupPinyin(char).filter((item) => item !== syllables[index])] : lookupPinyin(char)
+  }));
+}
+
+function createSentenceChar(char, index) {
+  const options = lookupPinyin(char);
+  return {
+    id: `${index}-${char.codePointAt(0)}`,
+    char,
+    pinyinOptions: options,
+    pinyinIndex: 0
+  };
+}
+
+function withUpdatedPinyin(group) {
+  return {
+    ...group,
+    pinyin: groupToChars(group)
+      .map((char) => char.pinyinOptions[char.pinyinIndex] ?? "")
+      .filter(Boolean)
+      .join(" ")
+  };
 }
 
 function cycleColor(id) {
@@ -157,13 +292,51 @@ async function copySentencePng() {
   if (mode !== "sentence") return;
 
   try {
-    const blob = await svgToPngBlob(createSentenceSvg(sentenceLines, controls), controls.exportScale);
+    const blob = await svgToPngBlob(
+      createSentenceSvg(sentenceLines, controls),
+      controls.exportScale
+    );
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
     setStatus("Sentence PNG copied.");
   } catch (error) {
     console.error(error);
     setStatus("Sentence PNG copy is unavailable in this browser.");
   }
+}
+
+async function copySentenceWord(id) {
+  const group = findSentenceGroup(id);
+  if (!group) return;
+  const svg = createSentenceWordSvg(group, controls, group.meaning ?? "");
+
+  try {
+    const blob = await svgToPngBlob(svg, controls.exportScale);
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    setStatus(`${group.text} copied.`);
+  } catch (error) {
+    console.error(error);
+    try {
+      await navigator.clipboard.writeText(svg);
+      setStatus(`${group.text} SVG copied.`);
+    } catch (fallbackError) {
+      console.error(fallbackError);
+      try {
+        copyTextFallback(svg);
+        setStatus(`${group.text} SVG copied.`);
+      } catch (finalError) {
+        console.error(finalError);
+        setStatus("Word copy is unavailable in this browser.");
+      }
+    }
+  }
+}
+
+function findSentenceGroup(id) {
+  for (const line of sentenceLines) {
+    const group = line.groups.find((candidate) => candidate.id === id);
+    if (group) return group;
+  }
+  return null;
 }
 
 function copyTextFallback(text) {

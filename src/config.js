@@ -20,8 +20,17 @@ export const DEFAULT_CONTROLS = {
   sentenceHanziSize: 42,
   sentencePinyinSize: 16,
   sentencePaddingX: 14,
-  sentencePaddingY: 10,
-  sentenceGap: 8
+  sentencePaddingY: 12,
+  sentencePaddingTop: 18,
+  sentenceGap: 8,
+  wordGraphicHeaderHeight: 46,
+  wordGraphicColumnWidth: 91,
+  wordGraphicMinWidth: 180,
+  wordGraphicBodyHeight: 108,
+  wordGraphicHanziSize: 54,
+  wordGraphicPinyinSize: 16,
+  wordGraphicHanziY: 58,
+  wordGraphicPinyinY: 94
 };
 
 export const THEME = {

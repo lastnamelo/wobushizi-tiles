@@ -44,7 +44,9 @@ function parseSegment(segment, prefix) {
     groups.push({
       id: `${prefix}-${index}-${word}`,
       text: word,
-      pinyin: wordToPinyin(word)
+      pinyin: wordToPinyin(word),
+      chars: wordToChars(word),
+      colorIndex: 0
     });
     index += word.length;
   }
@@ -61,4 +63,16 @@ function wordToPinyin(word) {
     .map((char) => lookupPinyin(char)[0] ?? "")
     .filter(Boolean)
     .join(" ");
+}
+
+function wordToChars(word) {
+  return Array.from(word).map((char, index) => {
+    const options = lookupPinyin(char);
+    return {
+      id: `${index}-${char.codePointAt(0)}`,
+      char,
+      pinyinOptions: options,
+      pinyinIndex: 0
+    };
+  });
 }

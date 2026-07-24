@@ -46,8 +46,8 @@ export function createGraphicSvg(items, controls) {
   return new XMLSerializer().serializeToString(svg);
 }
 
-export function createSentenceSvg(lines, controls) {
-  const layout = layoutSentence(lines, controls);
+export function createSentenceSvg(lines, controls, meaning = "") {
+  const layout = layoutSentence(lines, controls, meaning);
   const svg = document.createElementNS(xmlNamespace, "svg");
   svg.setAttribute("xmlns", xmlNamespace);
   svg.setAttribute("width", String(layout.width));
@@ -60,6 +60,31 @@ export function createSentenceSvg(lines, controls) {
   background.setAttribute("height", "100%");
   background.setAttribute("fill", "#ffffff");
   svg.append(background);
+
+  if (layout.meaning) {
+    const bar = document.createElementNS(xmlNamespace, "rect");
+    bar.setAttribute("width", String(layout.width));
+    bar.setAttribute("height", String(layout.meaning.height));
+    bar.setAttribute("fill", "#111111");
+    svg.append(bar);
+
+    const box = document.createElementNS(xmlNamespace, "rect");
+    box.setAttribute("x", String(layout.meaning.padding));
+    box.setAttribute("y", String(layout.meaning.padding));
+    box.setAttribute("width", String(layout.width - layout.meaning.padding * 2));
+    box.setAttribute("height", String(layout.meaning.inputHeight));
+    box.setAttribute("fill", "#ffffff");
+    svg.append(box);
+
+    if (meaning.trim()) {
+      appendText(svg, meaning.trim(), layout.meaning.padding + 12, layout.meaning.padding + 28, {
+        size: 18,
+        weight: "400",
+        anchor: "start",
+        fill: THEME.hanziInk
+      });
+    }
+  }
 
   for (const line of layout.lines) {
     for (const group of line.groups) {
@@ -83,6 +108,74 @@ export function createSentenceSvg(lines, controls) {
       svg.append(wrapper);
     }
   }
+
+  return new XMLSerializer().serializeToString(svg);
+}
+
+export function createSentenceWordSvg(group, controls, meaning = "") {
+  const chars = group.chars?.length
+    ? group.chars
+    : Array.from(group.text).map((char, index) => ({
+        char,
+        pinyinOptions: group.pinyin.trim().split(/\s+/).filter(Boolean),
+        pinyinIndex: index
+      }));
+  const cleanMeaning = meaning.trim();
+  const width = Math.max(
+    controls.wordGraphicMinWidth,
+    chars.length * controls.wordGraphicColumnWidth
+  );
+  const columnWidth = width / Math.max(chars.length, 1);
+  const headerHeight = cleanMeaning ? controls.wordGraphicHeaderHeight : 0;
+  const bodyHeight = controls.wordGraphicBodyHeight;
+  const height = headerHeight + bodyHeight;
+  const svg = document.createElementNS(xmlNamespace, "svg");
+  svg.setAttribute("xmlns", xmlNamespace);
+  svg.setAttribute("width", String(width));
+  svg.setAttribute("height", String(height));
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("role", "img");
+
+  if (cleanMeaning) {
+    const header = document.createElementNS(xmlNamespace, "rect");
+    header.setAttribute("width", "100%");
+    header.setAttribute("height", String(headerHeight));
+    header.setAttribute("fill", "#050505");
+    svg.append(header);
+
+    appendText(svg, cleanMeaning.toUpperCase(), width / 2, 31, {
+      size: 20,
+      weight: "700",
+      anchor: "middle",
+      fill: "#ffffff"
+    });
+  }
+
+  chars.forEach((char, index) => {
+    const x = index * columnWidth;
+    const color = TILE_PALETTE[group.colorIndex ?? 0]?.value ?? TILE_PALETTE[0].value;
+    const body = document.createElementNS(xmlNamespace, "rect");
+    body.setAttribute("x", String(x));
+    body.setAttribute("y", String(headerHeight));
+    body.setAttribute("width", String(columnWidth));
+    body.setAttribute("height", String(bodyHeight));
+    body.setAttribute("fill", color);
+    svg.append(body);
+
+    appendText(svg, char.char ?? char, x + columnWidth / 2, headerHeight + controls.wordGraphicHanziY, {
+      size: controls.wordGraphicHanziSize,
+      weight: "700",
+      anchor: "middle",
+      fill: THEME.hanziInk
+    });
+
+    appendText(svg, pinyinToDisplay(char.pinyinOptions?.[char.pinyinIndex] ?? ""), x + columnWidth / 2, headerHeight + controls.wordGraphicPinyinY, {
+      size: controls.wordGraphicPinyinSize,
+      weight: "500",
+      anchor: "middle",
+      fill: THEME.hanziInk
+    });
+  });
 
   return new XMLSerializer().serializeToString(svg);
 }
@@ -165,15 +258,20 @@ function layoutItems(items, controls) {
   };
 }
 
-function layoutSentence(lines, controls) {
+function layoutSentence(lines, controls, meaning = "") {
   const maxWidth = 1280;
   const gap = controls.sentenceGap;
   const lineGap = 18;
+  const meaningHeight = 62;
+  const meaningGap = 14;
+  const meaningPadding = 10;
+  const inputHeight = 42;
+  const hasMeaningBar = true;
   const groupHeight =
     controls.sentencePaddingY * 2 + controls.sentenceHanziSize + controls.sentencePinyinSize + 8;
   const laidOutLines = [];
-  let y = 0;
-  let width = 1;
+  let y = hasMeaningBar ? meaningHeight + meaningGap : 0;
+  let width = hasMeaningBar ? 640 : 1;
 
   for (const sourceLine of lines) {
     let x = 0;
@@ -205,7 +303,14 @@ function layoutSentence(lines, controls) {
   return {
     lines: laidOutLines,
     width,
-    height: Math.max(1, y - lineGap)
+    height: Math.max(1, y - lineGap),
+    meaning: hasMeaningBar
+      ? {
+          height: meaningHeight,
+          inputHeight,
+          padding: meaningPadding
+        }
+      : null
   };
 }
 
