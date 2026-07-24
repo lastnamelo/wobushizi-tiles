@@ -85,6 +85,7 @@ export function renderSentence({
   board.style.setProperty("--sentence-padding-y", `${controls.sentencePaddingY}px`);
   board.style.setProperty("--sentence-padding-top", `${controls.sentencePaddingTop}px`);
   board.style.setProperty("--sentence-gap", `${controls.sentenceGap}px`);
+  board.style.setProperty("--sentence-tile-size", `${controls.sentenceTileSize}px`);
 
   lines.forEach((line, lineIndex) => {
     const row = document.createElement("div");
@@ -103,6 +104,21 @@ export function renderSentence({
 
       const stack = document.createElement("span");
       stack.className = "sentence-stack";
+      const chars = group.chars?.length
+        ? group.chars
+        : Array.from(group.text).map((char, index) => ({
+            char,
+            pinyinOptions: group.pinyin.split(/\s+/).filter(Boolean),
+            pinyinIndex: index
+          }));
+      const cardWidth =
+        chars.length <= 1
+          ? controls.sentenceTileSize
+          : Math.max(
+              controls.sentenceTileSize,
+              chars.length * controls.sentenceMergedCharWidth + controls.sentencePaddingX * 2
+            );
+      stack.style.setProperty("--sentence-card-width", `${cardWidth}px`);
 
       const meaning = document.createElement("input");
       meaning.className = "word-meaning";
@@ -138,14 +154,6 @@ export function renderSentence({
       hanziRow.className = "sentence-hanzi-row";
       const pinyinRow = document.createElement("span");
       pinyinRow.className = "sentence-pinyin-row";
-
-      const chars = group.chars?.length
-        ? group.chars
-        : Array.from(group.text).map((char, index) => ({
-            char,
-            pinyinOptions: group.pinyin.split(/\s+/).filter(Boolean),
-            pinyinIndex: index
-          }));
 
       chars.forEach((char, charIndex) => {
         const hanzi = document.createElement("span");

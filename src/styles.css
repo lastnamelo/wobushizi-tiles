@@ -266,11 +266,11 @@ button:focus-visible {
   flex-direction: column;
   align-items: stretch;
   gap: 0;
+  width: var(--sentence-card-width);
 }
 
 .word-meaning {
   width: 100%;
-  min-width: 110px;
   min-height: 38px;
   border: 0;
   border-radius: 0;
@@ -301,10 +301,8 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(
-    var(--sentence-hanzi-size) + var(--sentence-pinyin-size) + var(--sentence-padding-top) +
-      var(--sentence-padding-y) + 8px
-  );
+  width: 100%;
+  height: var(--sentence-tile-size);
   padding: var(--sentence-padding-top) var(--sentence-padding-x) var(--sentence-padding-y);
   background: #ffffff;
   color: #1f1a17;
@@ -315,10 +313,7 @@ button:focus-visible {
 .sentence-join {
   align-self: stretch;
   width: var(--sentence-gap);
-  min-height: calc(
-    var(--sentence-hanzi-size) + var(--sentence-pinyin-size) + var(--sentence-padding-top) +
-      var(--sentence-padding-y) + 8px
-  );
+  min-height: var(--sentence-tile-size);
   border: 0;
   border-radius: 0;
   padding: 0;
@@ -344,12 +339,18 @@ button:focus-visible {
 
 .sentence-hanzi-row,
 .sentence-pinyin-row {
-  display: grid;
-  grid-auto-columns: minmax(38px, 1fr);
-  grid-auto-flow: column;
+  display: flex;
   align-items: center;
-  justify-items: center;
+  justify-content: center;
   width: 100%;
+}
+
+.sentence-hanzi-row {
+  gap: 0;
+}
+
+.sentence-pinyin-row {
+  gap: 6px;
 }
 
 .sentence-hanzi {

@@ -123,7 +123,9 @@ export function createSentenceWordSvg(group, controls, meaning = "") {
   const cleanMeaning = meaning.trim();
   const width = Math.max(
     controls.wordGraphicMinWidth,
-    chars.length * controls.wordGraphicColumnWidth
+    chars.length <= 1
+      ? controls.wordGraphicMinWidth
+      : chars.length * controls.wordGraphicColumnWidth
   );
   const columnWidth = width / Math.max(chars.length, 1);
   const headerHeight = cleanMeaning ? controls.wordGraphicHeaderHeight : 0;
