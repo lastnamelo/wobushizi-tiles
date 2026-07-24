@@ -12,12 +12,6 @@ export function createGraphicSvg(items, controls) {
   svg.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`);
   svg.setAttribute("role", "img");
 
-  const background = document.createElementNS(xmlNamespace, "rect");
-  background.setAttribute("width", "100%");
-  background.setAttribute("height", "100%");
-  background.setAttribute("fill", "#ffffff");
-  svg.append(background);
-
   for (const box of layout.boxes) {
     const color = TILE_PALETTE[box.colorIndex]?.value ?? TILE_PALETTE[0].value;
     const group = document.createElementNS(xmlNamespace, "g");
@@ -68,8 +62,6 @@ export async function svgToPngBlob(svgMarkup, scale) {
     canvas.width = Math.ceil(image.width * scale);
     canvas.height = Math.ceil(image.height * scale);
     const context = canvas.getContext("2d");
-    context.fillStyle = "#ffffff";
-    context.fillRect(0, 0, canvas.width, canvas.height);
     context.scale(scale, scale);
     context.drawImage(image, 0, 0);
 
@@ -91,7 +83,7 @@ export function downloadBlob(blob, filename) {
 
 function layoutItems(items, controls) {
   const maxWidth = 1280;
-  const boardPadding = 4;
+  const boardPadding = 0;
   const tileSize = controls.tileSize ?? controls.hanziSize + controls.pinyinSize + controls.tilePadding * 2.2;
   const boxes = [];
   let x = boardPadding;
@@ -127,8 +119,8 @@ function layoutItems(items, controls) {
 
   return {
     boxes,
-    width: Math.max(boardPadding * 2, contentWidth || boardPadding * 2),
-    height: Math.max(boardPadding * 2, contentHeight || boardPadding * 2)
+    width: Math.max(1, contentWidth || tileSize),
+    height: Math.max(1, contentHeight || tileSize)
   };
 }
 
