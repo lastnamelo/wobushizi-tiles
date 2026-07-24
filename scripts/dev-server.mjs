@@ -26,7 +26,10 @@ createServer((request, response) => {
   }
 
   const file = statSync(target).isDirectory() ? join(target, "index.html") : target;
-  response.writeHead(200, { "content-type": types[extname(file)] ?? "application/octet-stream" });
+  response.writeHead(200, {
+    "cache-control": "no-store",
+    "content-type": types[extname(file)] ?? "application/octet-stream"
+  });
   createReadStream(file).pipe(response);
 }).listen(port, () => {
   console.log(`Tiles dev server running at http://localhost:${port}`);

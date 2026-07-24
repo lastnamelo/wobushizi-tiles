@@ -67,6 +67,38 @@ export function renderTiles({ board, items, controls, onColorCycle, onPinyinCycl
   }
 }
 
+export function renderSentence({ board, lines, controls }) {
+  board.innerHTML = "";
+  board.style.setProperty("--sentence-hanzi-size", `${controls.sentenceHanziSize}px`);
+  board.style.setProperty("--sentence-pinyin-size", `${controls.sentencePinyinSize}px`);
+  board.style.setProperty("--sentence-padding-x", `${controls.sentencePaddingX}px`);
+  board.style.setProperty("--sentence-padding-y", `${controls.sentencePaddingY}px`);
+  board.style.setProperty("--sentence-gap", `${controls.sentenceGap}px`);
+
+  for (const line of lines) {
+    const row = document.createElement("div");
+    row.className = "sentence-line";
+
+    for (const group of line.groups) {
+      const word = document.createElement("span");
+      word.className = "sentence-word";
+
+      const hanzi = document.createElement("span");
+      hanzi.className = "sentence-hanzi";
+      hanzi.textContent = group.text;
+
+      const pinyin = document.createElement("span");
+      pinyin.className = "sentence-pinyin";
+      pinyin.textContent = pinyinToDisplay(group.pinyin);
+
+      word.append(hanzi, pinyin);
+      row.append(word);
+    }
+
+    board.append(row);
+  }
+}
+
 export function renderPalette(container) {
   container.innerHTML = "";
   for (const color of TILE_PALETTE) {

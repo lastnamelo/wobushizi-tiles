@@ -82,7 +82,7 @@ h1 {
 }
 
 .is-hidden {
-  display: none;
+  display: none !important;
 }
 
 .panel,
@@ -221,10 +221,54 @@ button:focus-visible {
   min-width: min-content;
 }
 
+.sentence-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: min-content;
+}
+
 .tile-board br {
   flex-basis: 100%;
   width: 0;
   height: 0;
+}
+
+.sentence-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--sentence-gap);
+}
+
+.sentence-word {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(
+    var(--sentence-hanzi-size) + var(--sentence-pinyin-size) + var(--sentence-padding-y) * 2 + 8px
+  );
+  padding: var(--sentence-padding-y) var(--sentence-padding-x);
+  background: #ffffff;
+  color: #1f1a17;
+  line-height: 1;
+}
+
+.sentence-hanzi {
+  font-size: var(--sentence-hanzi-size);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sentence-pinyin {
+  margin-top: 8px;
+  font-size: var(--sentence-pinyin-size);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .tile-stack {

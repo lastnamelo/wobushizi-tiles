@@ -31,6 +31,7 @@
 
           <div class="button-row">
             <button type="button" id="clearInput">Clear</button>
+            <button type="button" id="makeSentence">Make sentence</button>
             <button type="button" class="primary-button" id="makeTiles">Make tiles</button>
           </div>
           <p class="status" id="inputStatus" role="status" aria-live="polite"></p>
@@ -42,9 +43,13 @@
         <section class="preview-panel" aria-label="Rendered tile preview">
           <div class="preview-surface" id="captureSurface">
             <div class="tile-board" id="tileBoard"></div>
+            <div class="sentence-board is-hidden" id="sentenceBoard"></div>
           </div>
         </section>
         <div class="bottom-actions">
+          <button type="button" class="sentence-action is-hidden" id="copySentencePng">
+            Copy sentence as PNG
+          </button>
           <button type="button" id="copyAllSvg">Copy all as SVG</button>
           <button type="button" class="primary-button" id="editText">Back to input</button>
         </div>

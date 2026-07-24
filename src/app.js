@@ -1,26 +1,34 @@
 import { DEFAULT_CONTROLS, TILE_PALETTE } from "./config.js";
-import { createGraphicSvg, svgToPngBlob } from "./export.js";
+import { createGraphicSvg, createSentenceSvg, svgToPngBlob } from "./export.js";
 import { parseTextToTiles } from "./parser.js";
-import { renderPalette, renderTiles } from "./renderer.js";
+import { renderPalette, renderSentence, renderTiles } from "./renderer.js";
+import { parseTextToSentence } from "./sentence-parser.js";
 
 const controls = { ...DEFAULT_CONTROLS };
 let items = [];
+let sentenceLines = [];
+let mode = "tiles";
 
 const elements = {
   inputPage: document.querySelector("#inputPage"),
   tilesPage: document.querySelector("#tilesPage"),
   sourceText: document.querySelector("#sourceText"),
   makeTiles: document.querySelector("#makeTiles"),
+  makeSentence: document.querySelector("#makeSentence"),
   editText: document.querySelector("#editText"),
   copyAllSvg: document.querySelector("#copyAllSvg"),
+  copySentencePng: document.querySelector("#copySentencePng"),
   clearInput: document.querySelector("#clearInput"),
   board: document.querySelector("#tileBoard"),
+  sentenceBoard: document.querySelector("#sentenceBoard"),
   inputStatus: document.querySelector("#inputStatus"),
   status: document.querySelector("#status"),
   paletteStrip: document.querySelector("#paletteStrip")
 };
 
-renderPalette(elements.paletteStrip);
+if (elements.paletteStrip) {
+  renderPalette(elements.paletteStrip);
+}
 bindEvents();
 
 function bindEvents() {
@@ -29,11 +37,22 @@ function bindEvents() {
       setStatus("Paste some Chinese text first.", elements.inputStatus);
       return;
     }
+    mode = "tiles";
     reparse();
+    showTilesPage();
+  });
+  elements.makeSentence?.addEventListener("click", () => {
+    if (!elements.sourceText.value.trim()) {
+      setStatus("Paste some Chinese text first.", elements.inputStatus);
+      return;
+    }
+    mode = "sentence";
+    parseSentence();
     showTilesPage();
   });
   elements.editText.addEventListener("click", showInputPage);
   elements.copyAllSvg.addEventListener("click", copyAllSvg);
+  elements.copySentencePng?.addEventListener("click", copySentencePng);
   elements.clearInput.addEventListener("click", () => {
     elements.sourceText.value = "";
     setStatus("Input cleared.", elements.inputStatus);
@@ -55,6 +74,21 @@ function reparse() {
 }
 
 function render() {
+  elements.paletteStrip?.classList.toggle("is-hidden", mode !== "tiles");
+  elements.board.classList.toggle("is-hidden", mode !== "tiles");
+  elements.sentenceBoard?.classList.toggle("is-hidden", mode !== "sentence");
+  elements.copySentencePng?.classList.toggle("is-hidden", mode !== "sentence");
+  elements.copyAllSvg.textContent = mode === "sentence" ? "Copy sentence as SVG" : "Copy all as SVG";
+
+  if (mode === "sentence" && elements.sentenceBoard) {
+    renderSentence({
+      board: elements.sentenceBoard,
+      lines: sentenceLines,
+      controls
+    });
+    return;
+  }
+
   renderTiles({
     board: elements.board,
     items,
@@ -63,6 +97,11 @@ function render() {
     onPinyinCycle: cyclePinyin,
     onCopyTile: copySingleTile
   });
+}
+
+function parseSentence() {
+  sentenceLines = parseTextToSentence(elements.sourceText.value);
+  render();
 }
 
 function cycleColor(id) {
@@ -95,7 +134,10 @@ async function copySingleTile(id) {
 }
 
 async function copyAllSvg() {
-  const svg = createGraphicSvg(items, controls);
+  const svg =
+    mode === "sentence"
+      ? createSentenceSvg(sentenceLines, controls)
+      : createGraphicSvg(items, controls);
   try {
     await navigator.clipboard.writeText(svg);
     setStatus("SVG markup copied.");
@@ -108,6 +150,19 @@ async function copyAllSvg() {
       console.error(fallbackError);
       setStatus("SVG copy is unavailable in this browser.");
     }
+  }
+}
+
+async function copySentencePng() {
+  if (mode !== "sentence") return;
+
+  try {
+    const blob = await svgToPngBlob(createSentenceSvg(sentenceLines, controls), controls.exportScale);
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    setStatus("Sentence PNG copied.");
+  } catch (error) {
+    console.error(error);
+    setStatus("Sentence PNG copy is unavailable in this browser.");
   }
 }
 
